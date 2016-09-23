@@ -104,6 +104,10 @@ module Shards
             read_mapping(pull) { target[pull.read_scalar] = pull.read_scalar }
             targets << target
           end
+        when "executables"
+          read_sequence(pull) do
+            executables << pull.read_scalar
+          end
         when "libraries"
           read_mapping(pull) do
             libraries << Library.new(pull)
@@ -152,6 +156,10 @@ module Shards
 
     def targets
       @targets ||= [] of Target
+    end
+
+    def executables
+      @executables ||= [] of String
     end
 
     def libraries

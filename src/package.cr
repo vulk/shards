@@ -67,6 +67,20 @@ module Shards
       raise ex
     end
 
+    def install_executables
+      if installed? && spec.executables.any?
+        bin_path = File.join(Dir.current, "bin")
+        Dir.mkdir_p(bin_path)
+
+        spec.executables.each do |name|
+          Shards.logger.debug "Install bin/#{name}"
+          source = File.join(resolver.install_path, "bin", name)
+          dest = File.join(bin_path, name)
+          FileUtils.cp(source, dest)
+        end
+      end
+    end
+
     def to_lock(io : IO)
       key = resolver.class.key
       io << "    " << key << ": " << @dependency[key] << "\n"

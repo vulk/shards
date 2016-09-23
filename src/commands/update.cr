@@ -14,6 +14,7 @@ module Shards
             Shards.logger.info "Installing #{package.name} (#{package.version})"
             package.install
           end
+          package.install_executables
         end
 
         if generate_lockfile?

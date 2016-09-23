@@ -108,4 +108,22 @@ class UpdateCommandTest < Minitest::Test
       refute File.exists?(path)
     end
   end
+
+  def test_installs_executables
+    metadata = {
+      dependencies: {
+        binary: { type: "path", path: rel_path(:binary) },
+      }
+    }
+    with_shard(metadata) { run("shards install --no-color") }
+
+    create_file "binary", "bin/foo", "echo 'FOO'", perm: 0o755
+    create_shard "binary", "name: binary\nversion: 0.2.0\nexecutables:\n  - foobar\n  - baz\n  - foo"
+
+    with_shard(metadata) { run("shards update --no-color") }
+
+    foo = File.join(application_path, "bin", "foo")
+    assert File.exists?(foo), "Expected to have installed bin/foo executable"
+    assert_equal "FOO\n", `#{foo}`
+  end
 end
