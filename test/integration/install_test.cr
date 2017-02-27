@@ -269,4 +269,34 @@ class InstallCommandTest < Minitest::Test
       assert_match "Error shard name (mock) doesn't match dependency name (typo)", ex.stdout
     end
   end
+
+  def test_resolves_cross_dependency_with_ref_versus_version
+    create_git_repository "db"
+    create_git_release "db", "0.2.0", "name: db\nversion: 0.2.0\n"
+    create_file "db", "Makefile", ""
+    create_git_commit "db"
+
+    create_git_repository "mysql"
+    create_git_release "mysql", "0.1.0", <<-YAML
+    name: mysql
+    version: 0.1.0
+    dependencies:
+      db:
+        git: #{git_url(:db)}
+        version: ~> 0.2.0\n
+    YAML
+
+    metadata = {
+      dependencies: {
+        db: { git: git_url(:db), branch: "master" },
+        mysql: { git: git_url(:mysql), version: "0.1.0" },
+      }
+    }
+
+    with_shard(metadata) do
+      run "shards install --no-color"
+    end
+
+    exit
+  end
 end

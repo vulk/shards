@@ -48,6 +48,13 @@ module Shards
       end
     end
 
+    def create_git_branch(project, branch, refs = "master")
+      Dir.cd(git_path(project)) do
+        run "git branch #{branch} #{refs}"
+        run "git checkout #{branch}"
+      end
+    end
+
     def create_shard(project, contents)
       create_file project, "shard.yml", contents
     end
